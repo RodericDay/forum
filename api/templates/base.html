@@ -1,0 +1,40 @@
+<!doctype html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="initial-scale=1, maximum-scale=1"/>
+<title>forum</title>
+{% block 'head' %}
+<style>
+body {
+    background-color: royalblue;
+}
+form {
+    margin: 0 auto;
+    display: block;
+    max-width: 400px;
+    background-color: whitesmoke;
+    padding: 10px;
+}
+form th {
+    text-align: left;
+}
+.helptext ul {
+    padding-left: 2em;
+    margin: 0;
+}
+.helptext, .errorlist {
+    display: block;
+    font-size: x-small;
+    pointer-events: none;
+}
+input:not(:focus) ~ .helptext {
+    height: 0;
+    overflow: hidden;
+}
+</style>
+{% endblock %}
+</head>
+
+<body>
+{% block 'body' %}{% endblock %}
+</body>

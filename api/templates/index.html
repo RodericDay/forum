@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'head' %}
+<script defer src="{% static 'lib/mithril.js' %}"></script>
+<script defer src="{% static 'lib/marked.js' %}"></script>
+
+<link rel="stylesheet" href="{% static 'style.css' %}"/>
+<script defer src="{% static 'script.js' %}"></script>
+
+<script>
+const django = {
+    username: "{{request.user}}",
+    csrf_token: "{{csrf_token}}",
+}
+</script>
+{% endblock %}

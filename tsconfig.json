@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "out": "client/script.js",
+        "target": "es5",
+        "typeRoots": ["/usr/local/lib/node_modules/@types/"],
+        "types": ["marked", "mithril-global"],
+        "lib": ["es2016", "dom"]
+    }
+}

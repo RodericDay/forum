@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block 'body' %}
+<form method="post">
+<table>
+{{form}}
+<tr><th><label for="secret">Secret:</label></th><td><input name="secret" required id="secret" /></td></tr>
+</table>
+{% csrf_token %}
+<input type="submit" value="register" name="register"/>
+<a href="{% url 'login' %}">login</a>
+</form>
+{% endblock %}
