@@ -4,10 +4,18 @@ declare const django:{csrf_token:string; username:string}
 const range = n => Array(n).fill(null).map((_,i)=>i+1)
 const showtime = timestamp => new Date(timestamp).toISOString().replace(/T/g, ' ').slice(0,-5)
 const scrollToId = id => document.getElementById(id).scrollIntoView()
-const urlify = ({dom}) => dom.innerHTML = dom.innerHTML.replace(/(https?:\/\/.[^\s]+)/g, `<a target="_blank" href="$1">$1</a>`)
 const parenthood = (el:Node, selector:string) => {
     while(el.parentElement&&!el.parentElement.matches(selector)){el=el.parentElement}
     return el.parentElement
+}
+
+const urlify = string => {
+    return string.replace(/(https?:\/\/.[^\s"]+)/g, `<a target="_blank" href="$1">$1</a>`)
+}
+const markup = ({dom}) => {
+    let text = dom.innerHTML
+    text = urlify(text)
+    dom.innerHTML = text
 }
 
 const url = {
@@ -44,7 +52,7 @@ const Post = (post, i?) => m(`.post#${post.index}`,
         m(".detail", Link(`/posts/${post.id}/`, "detail")),
         m(".index", `#${post.index||post.id}`),
     ),
-    m(".text", {oncreate: urlify}, post.text),
+    m(".text", {oncreate: markup}, post.text),
 )
 const Topic = (topic) => {
     const unseen_count = topic.post_count - topic.seen_count
