@@ -29,7 +29,7 @@ const state = {
     posts: null,
     post: null,
     form: {
-        title: null,
+        title: "",
         text: "",
     },
     users: null,
@@ -82,6 +82,7 @@ const PostReply = {
         try {
             await api.post(`/api/topics/${m.route.param("id")}/`, {text: state.form.text})
             state.posts = await api.get(`/api/topics/${m.route.param("id")}/`)
+            state.form.title = ""
             state.form.text = ""
         }
         catch(error) {
@@ -226,6 +227,8 @@ const TopicNew = {
         try {
             await api.post("/api/topics/", {title: state.form.title, text: state.form.text})
             m.route.set("/topics/")
+            state.form.title = ""
+            state.form.text = ""
         }
         catch(error) {
             state.errors.push(error)
