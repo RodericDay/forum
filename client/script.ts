@@ -167,7 +167,6 @@ const PostList = {
             const text = range.toString().trim().split('\n').map(l=>`> ${l}`).join('\n')
             const rects = range.getClientRects()
             const {right:x, bottom:y} = Array.from(rects).pop()
-            const button:HTMLButtonElement = document.querySelector("button#quote")
             state.selection = {text, left: `${x}px`, top: `${y}px`}
         }
         m.redraw()
@@ -179,6 +178,7 @@ const PostList = {
         setTimeout(()=>list.parentNode["style"].userSelect = null, 100)
 
         state.form.text += state.selection.text + '\n\n'
+        document.querySelector(".quickpost")["open"] = true
         const textarea:HTMLTextAreaElement = document.querySelector("form.reply textarea")
         setTimeout(()=>{textarea.scrollTop=1E9; textarea.focus()}, 100)
         state.selection = null
