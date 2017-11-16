@@ -159,7 +159,8 @@ const PostList = {
         const selection = getSelection()
         const range = selection.getRangeAt(0)
         const {anchorNode, focusNode, anchorOffset:i, focusOffset:j} = selection
-        if(parenthood(anchorNode, ".post") !== parenthood(focusNode, ".post") || i===j) {
+        const post = parenthood(anchorNode, ".post")
+        if(!post || post !== parenthood(focusNode, ".post") || i===j) {
             state.selection = null
         }
         else {
