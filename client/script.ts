@@ -88,8 +88,16 @@ const PostReply = {
             state.errors.push(error)
         }
     },
+    oncreate({dom}) {
+        document.onkeyup = (e) => {
+            if(!dom.open && e.key==='`'){
+                dom.open = true
+                dom.querySelector("textarea").focus()
+            }
+        }
+    },
     view() {
-        return m(`details.quickpost${state.form.text?'[open]':''}`, m("summary", "reply"),
+        return m("details.quickpost", m("summary", "reply"),
             m("form.reply", {onsubmit: this.submit.bind(this)},
                 m("textarea", {
                     value: state.form.text,
