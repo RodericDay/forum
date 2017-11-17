@@ -9,6 +9,11 @@ const parenthood = (el:Node, selector:string) => {
     return el.parentElement
 }
 
+const escape_ = string => {
+    const temp = document.createElement("div")
+    temp.textContent = string
+    return temp.innerHTML
+}
 const urlify = string => {
     return string.replace(/(https?:\/\/.[^\s"]+)/g, `<a target="_blank" href="$1">$1</a>`)
 }
@@ -26,11 +31,11 @@ const quoteindent = string => {
     }
     return output.join('')
 }
-const markup = ({dom}) => {
-    let text = dom.innerHTML
-    text = urlify(text)
-    text = quoteindent(text)
-    dom.innerHTML = text
+const markup = (string) => {
+    string = escape_(string)
+    string = urlify(string)
+    string = quoteindent(string)
+    return m.trust(string)
 }
 
 const url = {
@@ -67,7 +72,7 @@ const Post = (post, i?) => m(`.post#${post.index}`,
         m(".detail", Link(`/posts/${post.id}/`, "detail")),
         m(".index", `#${post.index||post.id}`),
     ),
-    m(".text", {oncreate: markup}, post.text),
+    m(".text", markup(post.text)),
 )
 const Topic = (topic) => {
     const unseen_count = topic.post_count - topic.seen_count
@@ -142,11 +147,11 @@ const PostDetail = {
     },
     async submit() {
         state.post = await api.patch(`/api/posts/${m.route.param("id")}/`, {text: state.form.text})
-        state.form.text = ""
+        state.form.text = state.post.text
     },
     async delete() {
         state.post = await api.patch(`/api/posts/${m.route.param("id")}/`, {text: "[deleted]"})
-        state.form.text = ""
+        state.form.text = state.post.text
     },
     view() {
         return m(".post-detail", state.post
