@@ -42,9 +42,9 @@ urlpatterns = [
     url(r'^logout/$', logout, name='logout'),
 
     url(r'^api/topics/$', views.TopicList.as_view()),
-    url(r'^api/topics/(?P<topic_id>\d+)/$', views.PostList.as_view()),
-    url(r'^api/topics/(?P<pk>\d+)/edit/$', views.TopicDetail.as_view()),
-    url(r'^api/posts/(?P<pk>\d+)/$', views.PostDetail.as_view()),
+    url(r'^api/topics/(?P<pk>\d+)/$', views.TopicDetail.as_view()),
+    url(r'^api/topics/(?P<topic_id>\d+)/posts/$', views.PostList.as_view()),
+    url(r'^api/topics/(?P<topic_id>\d+)/posts/(?P<pk>\d+)/$', views.PostDetail.as_view()),
     url(r'^api/users/$', views.UserList.as_view()),
     url(r'^api/', lambda request: JsonResponse({"error": "Not found."}, status=404)),
 ]

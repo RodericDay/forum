@@ -34,7 +34,7 @@ class TestAll(test.APITestCase):
         self.assertEqual(topic["post_count"], 1)
 
     def test_post_list(self):
-        response = self.client.get("/api/topics/1/")
+        response = self.client.get("/api/topics/1/posts/")
         self.assertEqual(response.data["topic"]["title"], "Existing topic")
         self.assertEqual(response.data["page_size"], settings.REST_FRAMEWORK["PAGE_SIZE"])
 
@@ -44,7 +44,7 @@ class TestAll(test.APITestCase):
         self.assertTrue("topic" not in post, msg=post.get("topic"))
 
     def test_post_detail(self):
-        post = self.client.get("/api/posts/1/")
+        post = self.client.get("/api/topics/1/posts/1/")
         self.assertEqual(post.data["text"], "Existing post")
         self.assertEqual(post.data["author"], "user")
         self.assertEqual(post.data["topic"]["title"], "Existing topic")
@@ -63,7 +63,7 @@ class TestAll(test.APITestCase):
         self.client.force_login(self.other)
         data = {"text": "Second post"}
 
-        self.client.post("/api/topics/1/", data, format="json")
+        self.client.post("/api/topics/1/posts/", data, format="json")
 
         topic = Topic.objects.last()
         self.assertEqual(topic.post_count, 2)
@@ -75,21 +75,21 @@ class TestAll(test.APITestCase):
     def test_edit(self):
         data = {"text": "Edited post"}
 
-        response = self.client.patch("/api/posts/1/", data, format="json")
+        response = self.client.patch("/api/topics/1/posts/1/", data, format="json")
         self.assertEqual(response.data["text"], "Edited post")
 
     def test_edit_by_other(self):
         self.client.force_login(self.other)
         data = {"text": "Edited post"}
 
-        response = self.client.put("/api/posts/1/", data, format="json")
+        response = self.client.put("/api/topics/1/posts/1/", data, format="json")
         self.assertEqual(response.status_code, 403)
 
     def test_edit_by_admin(self):
         self.client.force_login(self.admin)
         data = {"text": "Edited post"}
 
-        response = self.client.patch("/api/posts/1/", data, format="json")
+        response = self.client.patch("/api/topics/1/posts/1/", data, format="json")
         self.assertEqual(response.data["text"], "Edited post")
         self.assertEqual(response.data["author"], "user")
 
@@ -99,15 +99,15 @@ class TestAll(test.APITestCase):
         record = Record.objects.create(topic_id=1, user_id=2)
         self.assertEqual(record.count, 0)
 
-        self.client.get("/api/topics/1/?page=1")
+        self.client.get("/api/topics/1/posts/?page=1")
         record.refresh_from_db()
         self.assertEqual(record.count, 5)
 
-        self.client.get("/api/topics/1/?page=2")
+        self.client.get("/api/topics/1/posts/?page=2")
         record.refresh_from_db()
         self.assertEqual(record.count, 6)
 
-        self.client.get("/api/topics/1/?page=1")
+        self.client.get("/api/topics/1/posts/?page=1")
         record.refresh_from_db()
         self.assertEqual(record.count, 6)
 
@@ -115,7 +115,7 @@ class TestAll(test.APITestCase):
         Post.objects.bulk_create([Post(text=str(i), topic_id=1) for i in range(5)])
 
         with self.assertNumQueries(12):
-            response = self.client.get("/api/topics/1/")
+            response = self.client.get("/api/topics/1/posts/")
         self.assertEqual(response.data["count"], 6)
 
     def test_no_np1q_on_topic_list(self):
@@ -129,10 +129,10 @@ class TestAll(test.APITestCase):
         self.client.force_login(self.admin)
         data = {"text": "Second post"}
 
-        response = self.client.post("/api/topics/1/", data, format="json")
+        response = self.client.post("/api/topics/1/posts/", data, format="json")
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.post("/api/topics/1/", data, format="json")
+        response = self.client.post("/api/topics/1/posts/", data, format="json")
         self.assertEqual(response.status_code, 429)
         self.assertIn("15 seconds", response.data["detail"])
 
@@ -141,11 +141,11 @@ class TestAll(test.APITestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_delete_topic(self):
-        response = self.client.delete("/api/topics/1/edit/")
+        response = self.client.delete("/api/topics/1/")
         self.assertEqual(response.status_code, 403)
 
         self.client.force_login(self.admin)
-        response = self.client.delete("/api/topics/1/edit/")
+        response = self.client.delete("/api/topics/1/")
         self.assertEqual(response.status_code, 204)
 
         self.assertEqual(Topic.objects.count(), 0)
