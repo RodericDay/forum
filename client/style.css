@@ -15,6 +15,7 @@ nav a {
 main {
     background-color: white;
     padding: 10px;
+    overflow-x: hidden;
 }
 h1 {
     font-size: large;
@@ -57,9 +58,6 @@ h1 {
     margin: 0;
     white-space: pre-wrap;
     word-wrap: break-word;
-}
-.pages {
-    text-align: center;
 }
 
 .errors {
@@ -122,7 +120,11 @@ button#quote {
     transform: translateX(-100%);
 }
 
+.pages {
+    text-align: center;
+}
 .pages > * {
+    display: inline-block;
     padding: 3px;
 }
 
