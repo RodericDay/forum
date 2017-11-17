@@ -69,7 +69,7 @@ const Post = (post, i?) => m(`.post#${post.index}`,
     m(".meta",
         m(".author", Link(`/users/${post.author.id}/`, post.author)),
         m(".timestamp", showtime(post.timestamp)),
-        m(".detail", Link(`/posts/${post.id}/`, "detail")),
+        m(".detail", Link(`/topics/${m.route.param("tid")}/posts/${post.id}/`, "detail")),
         m(".index", `#${post.index||post.id}`),
     ),
     m(".text", markup(post.text)),
@@ -77,12 +77,12 @@ const Post = (post, i?) => m(`.post#${post.index}`,
 const Topic = (topic) => {
     const unseen_count = topic.post_count - topic.seen_count
     return m(".topic",
-        m(".posts", Link(`/topics/${topic.id}/`, topic.title)),
+        m(".posts", Link(`/topics/${topic.id}/posts/`, topic.title)),
         m(".author", Link(`/users/${topic.author.id}/`, topic.author)),
         m(".post-count", topic.post_count),
         m(".unseen-count", unseen_count
-        ? Link(`/topics/${topic.id}/?page=${Math.ceil(topic.seen_count/topic.page_size)||1}&post=${topic.seen_count||1}`, `${unseen_count}`)
-        : Link(`/topics/${topic.id}/?page=${Math.ceil(topic.post_count/topic.page_size)||1}&post=${topic.post_count||1}`, '')
+        ? Link(`/topics/${topic.id}/posts/?goto=${topic.seen_count||1}`, `${unseen_count}`)
+        : Link(`/topics/${topic.id}/posts/?goto=${topic.post_count||1}`, '')
         ),
         m(".timestamp", showtime(topic.last_post)),
     )
@@ -108,8 +108,8 @@ const PostReply = {
     async submit(event) {
         event.preventDefault()
         try {
-            await api.post(`/api/topics/${m.route.param("id")}/`, {text: state.form.text})
-            state.posts = await api.get(`/api/topics/${m.route.param("id")}/`)
+            await api.post(`/api/topics/${m.route.param("tid")}/posts/`, {text: state.form.text})
+            state.posts = await api.get(`/api/topics/${m.route.param("tid")}/posts/`)
             state.form.title = ""
             state.form.text = ""
         }
@@ -142,15 +142,15 @@ const PostDetail = {
         state.post = null
     },
     async oncreate() {
-        state.post = await api.get(`/api/posts/${m.route.param("id")}/`)
+        state.post = await api.get(`/api/topics/${m.route.param("tid")}/posts/${m.route.param("pid")}/`)
         state.form.text = state.post.text
     },
     async submit() {
-        state.post = await api.patch(`/api/posts/${m.route.param("id")}/`, {text: state.form.text})
+        state.post = await api.patch(`/api/topics/${m.route.param("tid")}/posts/${m.route.param("pid")}/`, {text: state.form.text})
         state.form.text = state.post.text
     },
     async delete() {
-        state.post = await api.patch(`/api/posts/${m.route.param("id")}/`, {text: "[deleted]"})
+        state.post = await api.patch(`/api/topics/${m.route.param("tid")}/posts/${m.route.param("pid")}/`, {text: "[deleted]"})
         state.form.text = state.post.text
     },
     view() {
@@ -175,12 +175,12 @@ const PostList = {
         state.posts = null
     },
     async oncreate() {
-        state.posts = await api.get(`/api/topics/${m.route.param("id")}/?page=${url.params.page||1}`)
+        state.posts = await api.get(`/api/topics/${m.route.param("tid")}/posts/?page=${url.params.page||1}`)
         if(url.params.post) setTimeout(scrollToId, 100, url.params.post)
     },
     async delete() {
         if(!confirm("You sure?")) return
-        await api.delete(`/api/topics/${m.route.param("id")}/edit/`)
+        await api.delete(`/api/topics/${m.route.param("tid")}/`)
         m.route.set('/topics/')
     },
     async highlight() {
@@ -339,8 +339,8 @@ const Layout = subcomponent => ({
 m.route(document.body, '/topics/', {
     '/topics/': Layout(TopicList),
     '/topics/new/': Layout(TopicNew),
-    '/topics/:id/': Layout(PostList),
-    '/posts/:id/': Layout(PostDetail),
+    '/topics/:tid/posts/': Layout(PostList),
+    '/topics/:tid/posts/:pid/': Layout(PostDetail),
     '/profile/': Layout(Profile),
     '/stats/': Layout(Stats),
     '/users/': Layout(UserList),
