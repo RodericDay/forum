@@ -12,9 +12,24 @@ const parenthood = (el:Node, selector:string) => {
 const urlify = string => {
     return string.replace(/(https?:\/\/.[^\s"]+)/g, `<a target="_blank" href="$1">$1</a>`)
 }
+const quoteindent = string => {
+    const lines = string.split('\n')
+    const output = []
+    const indentation = [0]
+    while(lines.length) {
+        const line = lines.shift()
+        indentation.push( (line.match(/^(&gt;)\1*/, m=>m.length/4)||[''])[0].length/4 )
+        let [a, b] = indentation.slice(-2)
+        while(a < b) { a++; output.push(`<div class="quote" data-level="${b}">`) }
+        while(a > b) { a--; output.push(`</div>`) }
+        output.push(line.replace(/^(&gt;)\1*/, m=>`<span class="marker">${m}</span>`)+'\n')
+    }
+    return output.join('')
+}
 const markup = ({dom}) => {
     let text = dom.innerHTML
     text = urlify(text)
+    text = quoteindent(text)
     dom.innerHTML = text
 }
 
@@ -164,15 +179,18 @@ const PostList = {
         m.route.set('/topics/')
     },
     async highlight() {
-        const selection = getSelection()
-        const range = selection.getRangeAt(0)
-        const {anchorNode, focusNode, anchorOffset:i, focusOffset:j} = selection
-        const post = parenthood(anchorNode, ".post")
-        if(!post || post !== parenthood(focusNode, ".post") || i===j) {
+        const range = getSelection().getRangeAt(0)
+        const {startContainer, endContainer, collapsed} = range
+        const post = parenthood(startContainer, ".post")
+        if(!post || post !== parenthood(endContainer, ".post") || collapsed) {
             state.selection = null
         }
         else {
-            const text = range.toString().trim().split('\n').map(l=>`> ${l}`).join('\n')
+            const prefix = ">"
+            const midQuote = parenthood(startContainer, ".quote")
+            const pad = midQuote ? Array(+midQuote.dataset.level).fill(prefix).join('') : ''
+            const text = pad + range.toString().trim().replace(/^/gm, prefix)
+
             const rects = range.getClientRects()
             const {right:x, bottom:y} = Array.from(rects).pop()
             state.selection = {text, left: `${x}px`, top: `${y}px`}

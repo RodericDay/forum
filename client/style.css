@@ -125,3 +125,12 @@ button#quote {
 .pages > * {
     padding: 3px;
 }
+
+.quote {
+    margin-left: 1em;
+    padding: 3px;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+.quote .marker {
+    font-size: 0;
+}
