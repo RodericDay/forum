@@ -69,8 +69,15 @@ const Post = (post, i?) => m(`.post#${post.index}`,
     m(".meta",
         m(".author", Link(`/users/${post.author.id}/`, post.author)),
         m(".timestamp", showtime(post.timestamp)),
-        m(".detail", Link(`/topics/${m.route.param("tid")}/posts/${post.id}/`, "detail")),
-        m(".index", `#${post.index||post.id}`),
+        post.context
+        ? [
+            m(".link", Link(`/topics/${post.topic.id}/posts/?page=${post.context.page}&post=${post.context.index}`, "context")),
+            m(".index", `#${post.context.index}`),
+        ]
+        : [
+            m(".link", Link(`/topics/${m.route.param("tid")}/posts/${post.id}/`, "detail")),
+            m(".index", `#${post.index||post.id}`),
+        ],
     ),
     m(".text", markup(post.text)),
 )
@@ -81,8 +88,8 @@ const Topic = (topic) => {
         m(".author", Link(`/users/${topic.author.id}/`, topic.author)),
         m(".post-count", topic.post_count),
         m(".unseen-count", unseen_count
-        ? Link(`/topics/${topic.id}/posts/?goto=${topic.seen_count||1}`, `${unseen_count}`)
-        : Link(`/topics/${topic.id}/posts/?goto=${topic.post_count||1}`, '')
+        ? Link(`/topics/${topic.id}/posts/?page=${Math.ceil(topic.seen_count/topic.page_size)||1}&post=${topic.seen_count||1}`, `${unseen_count}`)
+        : Link(`/topics/${topic.id}/posts/?page=${Math.ceil(topic.post_count/topic.page_size)||1}&post=${topic.post_count||1}`, '')
         ),
         m(".timestamp", showtime(topic.last_post)),
     )
