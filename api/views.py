@@ -1,3 +1,5 @@
+import math
+
 from django.db.models import Count
 from django.utils import timezone
 from rest_framework import generics, permissions
@@ -89,8 +91,19 @@ class PostList(generics.ListCreateAPIView):
 
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.Post.objects.all()
     serializer_class = serializers.PostDetailSerializer
+
+    def get_queryset(self):
+        return models.Post.objects.filter(topic_id=self.kwargs["topic_id"])
+
+    def get(self, request, topic_id, pk):
+        response = super().get(request, topic_id, pk)
+        obj = self.get_object()
+        qs = self.get_queryset()
+        index = list(qs).index(obj) + 1
+        page = math.ceil(index/self.paginator.page_size)
+        response.data["context"] = {"index": index, "page": page}
+        return response
 
 
 class UserList(generics.ListAPIView):

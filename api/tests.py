@@ -149,3 +149,20 @@ class TestAll(test.APITestCase):
         self.assertEqual(response.status_code, 204)
 
         self.assertEqual(Topic.objects.count(), 0)
+
+    def test_post_detail_uses_topic_for_prefilter(self):
+        response = self.client.get("/api/topics/2/posts/1/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_post_detail_context_info(self):
+        topic = Topic.objects.create()
+        Post.objects.bulk_create([Post(text=i, topic_id=1) for i in range(20)])
+        Post.objects.bulk_create([Post(text=i, topic_id=2) for i in range(20)])
+
+        with self.assertNumQueries(6):
+            response = self.client.get("/api/topics/2/posts/28/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["context"]["index"], 7)
+        self.assertEqual(response.data["context"]["page"], 2)
+
+
